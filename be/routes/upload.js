@@ -3,10 +3,11 @@ const router = express.Router();
 const path = require('path');
 const PDF = require('../model/PDF');
 const { v4: uuidv4 } = require('uuid')
-
+const AWS = require('../aws-config')
 // Route to create a new PDF document
-router.post('/sent', async (req, res) => {
+const s3 = new AWS.S3();
 
+router.post('/sent', async (req, res) => {
   try {
     const { filename, description, owner } = req.body;
     const fileId = uuidv4();
@@ -19,22 +20,30 @@ router.post('/sent', async (req, res) => {
 
     await newPDF.save();
 
-    const file1 = req.files.file;
-    console.log(file1?.data);
+    const file = req.files.file;
 
-    console.log("File is", req)
-    file1.mv(`uploads/${fileId}.pdf`, (err) => {
+    const uploadParams = {
+      Bucket: 'pdffilestorage-1',
+      Key: `${fileId}.pdf`,
+      Body: file.data
+    };
+    
+
+    s3.upload(uploadParams, (err, data) => {
       if (err) {
-        return res.status(500).send(err);
+        console.error('Error uploading file to S3:', err);
+        return res.status(500).json({ error: 'Error uploading file to S3' });
       }
+
+      console.log('File uploaded to S3:', data.Location);
       res.status(201).send(newPDF);
-      // res.send('File uploaded successfully!');
     });
   } catch (error) {
     console.error('Error creating PDF document:', error);
     res.status(500).json({ error: 'Error creating PDF document' });
   }
 });
+
 
 router.get('/pdfs/:username', async (req, res) => {
   try {
@@ -57,17 +66,26 @@ router.get('/pdf/:fileId', async (req, res) => {
       return res.status(404).json({ error: 'PDF not found' });
     }
 
-    // const filePath = `uploads/${pdf.fileId}.pdf`;
-    const filePath = path.resolve(`uploads/${pdf.fileId}.pdf`);
+    const s3Params = {
+      Bucket: 'pdffilestorage-1',
+      Key: `${pdf.fileId}.pdf`
+    };
+    s3.getObject(s3Params, (err, data) => {
+      if (err) {
+        console.error('Error retrieving PDF from S3:', err);
+        return res.status(500).json({ error: 'Error retrieving PDF from S3' });
+      }
 
-    // Send the PDF file as a response
-    // res.sendFile(filePath);
-    res.sendFile(filePath);
+      res.setHeader('Content-Type', 'application/pdf');
+      res.send(data.Body);
+    });
   } catch (error) {
     console.error('Error retrieving PDF:', error);
     res.status(500).json({ error: 'Error retrieving PDF' });
   }
 });
+
+
 
 router.put('/update/:fileId', async (req, res) => {
   try {
