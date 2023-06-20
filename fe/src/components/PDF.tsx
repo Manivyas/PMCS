@@ -35,28 +35,37 @@ const style = {
 };
 
 export const PDF = () => {
+    
     const [open, SetOpen] = useState(false);
+    const handleClose = () => SetOpen(false);
+    const [commentPdf, setCommentPdf] = useState<Ipdf>();
+    
+    const [displayPdf, setDisplayPdf] = useState<Ipdf>();
+    const { pdfs } = usePdfs();
+    const [copen, SetCOpen] = useState(false);
+    const [filteredPdfs,setFilterredPdfs] = useState<Ipdf[]>();
+    const navigate = useNavigate();
+    
+    useEffect(()=>{
+        setFilterredPdfs(pdfs);
+    },[pdfs])
+
+    useEffect(()=>{
+        setFilterredPdfs(filteredPdfs);
+    },[filteredPdfs])
+    
+
     const handleOpen = (pdf: any) => {
         setDisplayPdf(pdf);
         SetOpen(true);
     }
-    const handleClose = () => SetOpen(false);
-    const [commentPdf, setCommentPdf] = useState<Ipdf>();
-
-
-    const [displayPdf, setDisplayPdf] = useState<Ipdf>();
-
     //comment
-    const [copen, SetCOpen] = useState(false);
     const handleComOpen = (commentPdf: any) => {
         setCommentPdf(commentPdf);
         SetCOpen(true);
     }
     const handleComClose = () => SetCOpen(false);
-    const { pdfs } = usePdfs();
-    const [filteredPdfs,setFilterredPdfs] = useState<Ipdf[]>();
-    const navigate = useNavigate();
-
+    
     const logoutHandler = () => {
         localStorage.clear();
         navigate('/login');
@@ -64,7 +73,7 @@ export const PDF = () => {
 
     const searchHandler =(searchString:string)=>{
         let fPdfs = pdfs?.filter(pdf=>{
-            return pdf.filename.startsWith(searchString);
+            return pdf.filename.toLowerCase().startsWith(searchString);
         })
         console.log(searchString,fPdfs);
         setFilterredPdfs(fPdfs);
@@ -79,7 +88,7 @@ export const PDF = () => {
             <CustomizedInputBase dataHandler={searchHandler}/>
             <StyledDiv>
                 {
-                    pdfs?.map((pdf, ind) => {
+                    filteredPdfs?.map((pdf, ind) => {
                         return <Box key={ind} sx={{ width: '100%', maxWidth: 360, bgcolor: 'background.paper', m: 3, borderRadius: '10px', boxShadow: 'rgba(0,0,0,0.4) 0 0 4px' }}>
                             <Box sx={{ my: 3, mx: 2 }}>
                                 <Grid container alignItems="center">
