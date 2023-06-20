@@ -7,23 +7,23 @@ export const Login = () => {
   const [form] = Form.useForm();
   const navigate = useNavigate();
   const { login } = useHttpClient();
-  
+
   const validateUser = () => {
     login(form)
-    .then(res => {
-      if(res?.data?.isLoggedIn){
-        localStorage.setItem('isLoggedIn', JSON.stringify(res?.data?.isLoggedIn));
-        navigate('/home');
-      }
-      else{
-        alert('Invalid User');
-      }
-    })
-    .catch(err => {
-      // console.log(err);
-    })
+      .then(res => {
+        if (res?.data?.isLoggedIn) {
+          localStorage.setItem('isLoggedIn', JSON.stringify(res?.data?.isLoggedIn));
+          navigate('/home');
+        }
+        else {
+          alert('Invalid User');
+        }
+      })
+      .catch(err => {
+        // console.log(err);
+      })
   }
-  
+
   const onFinish = (values: any) => {
     localStorage.setItem('username', values.username);
     form.resetFields();
@@ -36,7 +36,7 @@ export const Login = () => {
   return (
     <div>
       <Form
-      form={form}
+        form={form}
         name="basic"
         labelCol={{ span: 8 }}
         wrapperCol={{ span: 16 }}
@@ -77,6 +77,10 @@ export const Login = () => {
             Submit
           </Button>
         </Form.Item>
+      <div style={{ marginLeft: '30%' }}>
+        Already have an account?
+        <a href='/signup' style={{ marginLeft: '5px',textDecoration:'none' }}>Signup</a>
+      </div>
       </Form>
     </div>
   )
