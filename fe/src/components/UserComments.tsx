@@ -59,8 +59,8 @@ export const UserComments = ({ filename, fileId, comments, description, owner, u
             }}
             currentUser={{
                 currentUserId: '01a',
-                currentUserImg: 'https://ui-avatars.com/api/name=Riya&background=random',
-                currentUserProfile: 'https://www.linkedin.com/in/riya-negi-8879631a9/',
+                currentUserImg: 'https://www.flaticon.com/free-icons/user',
+                currentUserProfile: '',
                 currentUserFullName: owner
             }} />
     );
